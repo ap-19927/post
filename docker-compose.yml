@@ -1,0 +1,54 @@
+version: "3.4"
+
+services:
+  db:
+    container_name: db
+    image: postgres
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    env_file:
+      - .env
+    networks:
+      - external
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+
+  source:
+    container_name: source
+    build:
+      dockerfile: Dockerfile
+      context: .
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env
+    networks:
+      - external
+
+  reverse-proxy:
+    container_name: reverse-proxy
+    image: nginx
+    volumes:
+      - ./data/nginx:/etc/nginx/conf.d
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    ports:
+      - "80:80"
+      - "443:443"
+
+  certbot:
+    container_name: cert
+    image: certbot/certbot
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+
+networks:
+  external:
+
+volumes:
+  db-data:

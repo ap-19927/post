@@ -1,0 +1,9 @@
+doctype html
+html
+  head
+    link(href="data:image/x-icon;base64,A" rel="icon" type="image/x-icon")
+  body
+    form(action=login method="post")
+      input(type="text" name="username" placeholder="username" required)
+      input(type="text" name="password" placeholder="password" id="password" required)
+      button#submitButton(type="submit") Login
