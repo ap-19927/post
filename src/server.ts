@@ -13,6 +13,8 @@ import { isoDate } from "./utils";
 import bcrypt from "bcrypt";
 import multer from "multer";
 
+const deletePath = `/${process.env.DELETE}`;
+
 const app: Express = express();
 app.set("trust proxy", true);
 
@@ -117,24 +119,24 @@ app.post(`/${process.env.POST}`, [check("text").trim().escape(), limiter, upload
 });
 
 app.get(`/${process.env.LOGIN}`, (req: Request, res: Response) => {
-  if(req.isAuthenticated()) return res.redirect(`/${process.env.DELETE}`);
+  if(req.isAuthenticated()) return res.redirect(deletePath);
   res.render("login", {login: `/${process.env.LOGIN}`,});
 });
 app.post(`/${process.env.LOGIN}`, passport.authenticate("local", {
-    successRedirect: `/${process.env.DELETE}`,
+    successRedirect: deletePath,
     failureRedirect: "/",
     failureMessage: "Invalid",
   }),
  (req: Request, res: Response) => res.redirect(`${process.env.DELETE}`)
 );
 
-app.get(`/${process.env.DELETE}`, async (req: Request, res: Response) => {
+app.get(deletePath, async (req: Request, res: Response) => {
   if (!req.isAuthenticated()) return res.redirect("/");
   const posts = await pool.query("SELECT * FROM posts ORDER BY date DESC;");
-  res.render("delete", {data: posts.rows, isoDate,});
+  res.render("delete", {data: posts.rows, isoDate, deletePath,});
 });
 
-app.post(`/${process.env.DELETE}`, async (req: Request, res: Response) => {
+app.post(deletePath, async (req: Request, res: Response) => {
   if (!req.isAuthenticated()) return res.redirect("/");
   const startDate = req.body.start;
   const endDate = req.body.end;

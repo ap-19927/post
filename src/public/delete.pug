@@ -3,7 +3,7 @@ html
   head
     link(href="data:image/x-icon;base64,A" rel="icon" type="image/x-icon")
   body
-    form(action="/delete" method="post")
+    form(action=deletePath method="post")
       input(type="text" name="start" placeholder="start" required)
       input(type="text" name="end" placeholder="end" required)
       button#submitButton(type="submit") Delete

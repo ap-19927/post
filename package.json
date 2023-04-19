@@ -1,10 +1,10 @@
 {
-  "name": "toast",
+  "name": "post.roadpeoples.com",
   "version": "1.0.0",
   "description": "",
   "source": "public/index.pug",
   "scripts": {
-    "dev": "parcel src/public/index.pug",
+    "dev": "docker compose -f docker-compose-dev.yml --build up",
     "build": "tsc"
   },
   "author": "",

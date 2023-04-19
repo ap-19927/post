@@ -14,11 +14,12 @@ Change the `IP`, `DNS`, and `PORT` names in `app.conf` to the public ip address 
 `mkdir data/nginx`
 
 `cp app.conf data/nginx`
+
+`docker compose up --build -d`
 ### TODO
 1. Given LOGIN and DELETE routes on separate, non-public listener.
 2. New SIGNUP routes on above listener.
 3. Image store as bytea instead of base64.
-4. Images too large for nginx - gives 413 error when trying to upload 1.1MB size image.
 4. improve doc
 5. content moderation
 
