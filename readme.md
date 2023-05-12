@@ -19,7 +19,7 @@ Change the `IP`, `DNS`, and `PORT` names in `app.conf` to the public ip address 
 ### TODO
 1. Given LOGIN and DELETE routes on separate, non-public listener.
 2. New SIGNUP routes on above listener.
-3. Image store as bytea instead of base64.
+3. have dev env self-sign cert. nginx alpine run certbot --nginx
 4. improve doc
 5. content moderation
 

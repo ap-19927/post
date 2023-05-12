@@ -9,7 +9,7 @@ import bodyParser from "body-parser";
 import { Pool } from "pg";
 import passport from "passport";
 import { Strategy } from "passport-local";
-import { isoDate } from "./utils";
+import { isoDate, base64 } from "./utils";
 import bcrypt from "bcrypt";
 import multer from "multer";
 
@@ -42,7 +42,7 @@ const pool: Pool = new Pool({
   password: process.env.POSTGRES_PASSWORD,
 });
 const createPostTable =
-  "CREATE TABLE IF NOT EXISTS posts (text varchar(256) NOT null, date timestamp NOT null DEFAULT NOW(), img text);"
+  "CREATE TABLE IF NOT EXISTS posts (text varchar(256) NOT null, date timestamp NOT null DEFAULT NOW(), img bytea);"
 const createPostIndex = "CREATE INDEX IF NOT EXISTS post_date ON posts (date DESC);"
 pool.query(createPostTable);
 pool.query(createPostIndex);
@@ -94,17 +94,13 @@ app.set("view engine", "pug");
 
 app.get("/", async (req: Request, res: Response) => {
   const posts = await pool.query("SELECT * FROM posts ORDER BY date DESC;");
-  res.render("index", {posts: posts.rows, isoDate,});
+  res.render("index", {posts: posts.rows, isoDate, base64,});
 });
 
 app.post(`/${process.env.POST}`, [check("text").trim().escape(), limiter, upload.single("img")], async (req: Request, res: Response) => {
   if(req.file && path.extname(req.file.originalname).toLowerCase() !== ".png")
     return res.status(403).contentType("text/plain").end("File must be of type .png");
-  const imgB64convrtFrmPath = async (filePath : string) => {
-    const imgRaw = await fs.readFile(filePath);
-    return `data:image/jpeg;base64,${imgRaw.toString("base64")}`;
-  }
-  const img = req.file ? await imgB64convrtFrmPath(req.file.path) : null;
+  const img = req.file ? await fs.readFile(req.file.path) : null;
   const text = req.body.text;
   await pool.query("INSERT INTO posts (text, img) VALUES ($1, $2);", [text, img],
     (err: Error) => {

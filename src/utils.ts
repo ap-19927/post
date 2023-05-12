@@ -4,11 +4,15 @@ const prependZero = (s: number) => {
 }
 export const isoDate = (dateString: string) => {
     const date = new Date(dateString);
-    const d = date.getDate();
-    const m = prependZero(date.getMonth()+1);
     const y = date.getFullYear();
+    const m = prependZero(date.getMonth()+1);
+    const d = prependZero(date.getDate());
     const h = prependZero(date.getHours());
     const mi = prependZero(date.getMinutes());
     const s = prependZero(date.getSeconds());
     return `${y}-${m}-${d}T${h}:${mi}:${s}Z`;
+}
+
+export const base64 = (imgRaw: ByteArray) => {
+  return `data:image/jpeg;base64,${imgRaw.toString("base64")}`;
 }

@@ -11,4 +11,4 @@ html
     for post in posts
       p #{isoDate(post.date)}
       p #{post.text}
-      img(src=post.img)
+      img(src=base64(post.img))
