@@ -11,3 +11,6 @@ ADMIN=1
 ADMIN_PASSWORD=1
 POST=post
 SESSION_SECRET=secret
+PROXY_PASS=http://172.17.0.1:9000
+URI=post.roadpeoples.org
+IP=127.0.0.1

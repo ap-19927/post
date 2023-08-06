@@ -5,17 +5,10 @@ What you wish, but we reserve the right to delete it.
 We hope to improve the documentation so others may spin up their own server with ease.
 
 ### Setup
-`cp env .env`
+1. Change the values in `env` sensibly. In particular, change `IP` to the IP address of your server, and `URI` to the URI which points to `IP`.
+2. `bash setup.sh`
 
-Change the `IP`, `DNS`, and `PORT` names in `app.conf` to the public ip address of your server, the domain name you have purchased, and the port the express server is running on, respectively.
 
-`mkdir data`
-
-`mkdir data/nginx`
-
-`cp app.conf data/nginx`
-
-`docker compose up --build -d`
 ### TODO
 1. Given LOGIN and DELETE routes on separate, non-public listener.
 2. New SIGNUP routes on above listener.
