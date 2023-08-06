@@ -31,3 +31,4 @@ https://stackoverflow.com/questions/29506253/best-session-storage-middleware-for
 https://stackoverflow.com/questions/41419484/typescript-import-of-an-es5-anonymous-function
 https://wiki.postgresql.org/wiki/BinaryFilesInDB
 https://stackoverflow.com/questions/15772394/how-to-upload-display-and-save-images-using-node-js-and-express
+https://pentacent.medium.com/nginx-and-lets-encrypt-with-docker-in-less-than-5-minutes-b4b8a60d3a71

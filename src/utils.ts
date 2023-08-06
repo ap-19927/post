@@ -10,7 +10,7 @@ export const isoDate = (dateString: string) => {
     const h = prependZero(date.getHours());
     const mi = prependZero(date.getMinutes());
     const s = prependZero(date.getSeconds());
-    return `${y}-${m}-${d}T${h}:${mi}:${s}Z`;
+    return `${y}-${m}-${d} ${h}:${mi}:${s}`;
 }
 
 export const base64 = (imgRaw: ByteArray) => {
