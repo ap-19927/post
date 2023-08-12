@@ -13,6 +13,6 @@ export const isoDate = (dateString: string) => {
     return `${y}-${m}-${d} ${h}:${mi}:${s}`;
 }
 
-export const base64 = (imgRaw: ByteArray) => {
-  return `data:image/jpeg;base64,${imgRaw.toString("base64")}`;
+export const base64 = (imgRaw: any) => {
+  return imgRaw === null ? '' : `data:image/jpeg;base64,${imgRaw.toString("base64")}`;
 }
