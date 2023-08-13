@@ -1,3 +1,9 @@
+cp env .env
+mkdir data
+mkdir data/nginx
+mkdir data/nginx/templates
+
+cat > data/nginx/templates/app.conf.template << EOF
 server {
   server_name ${IP} ${URI};
   location / {
@@ -7,6 +13,10 @@ server {
     root /var/www/certbot;
   }
 }
+EOF
+bash init-letsencrypt.sh
+
+cat >> data/nginx/templates/app.conf.template << EOF
 server {
   listen 443 ssl;
   server_name ${URI};
@@ -19,3 +29,5 @@ server {
   include /etc/letsencrypt/options-ssl-nginx.conf;
   ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 }
+EOF
+bash init-letsencrypt.sh
