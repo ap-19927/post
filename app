@@ -1,0 +1,6 @@
+server {
+  ${IP}
+}
+server {
+  ps
+}
