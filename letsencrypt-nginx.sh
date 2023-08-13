@@ -14,7 +14,7 @@ server {
   }
 }
 EOF
-bash init-letsencrypt.sh
+bash letsencrypt-init.sh
 
 cat >> data/nginx/templates/app.conf.template << EOF
 server {
@@ -30,4 +30,4 @@ server {
   ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 }
 EOF
-bash init-letsencrypt.sh
+bash letsencrypt-init.sh
