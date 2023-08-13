@@ -1,6 +1,0 @@
-server {
-  ${IP}
-}
-server {
-  ps
-}
