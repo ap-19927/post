@@ -7,6 +7,7 @@ POSTGRES_PASSWORD=postgres
 PATH_IMG_UP=img
 DELETE=delete
 LOGIN=login
+SIGNUP=signup
 ADMIN=1
 ADMIN_PASSWORD=1
 POST=post

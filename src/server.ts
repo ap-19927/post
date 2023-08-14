@@ -14,6 +14,7 @@ import bcrypt from "bcrypt";
 import multer from "multer";
 
 const deletePath = `/${process.env.DELETE}`;
+const postPath = `/${process.env.POST}`;
 
 const app: Express = express();
 app.set("trust proxy", true);
@@ -47,7 +48,7 @@ const createPostIndex = "CREATE INDEX IF NOT EXISTS post_date ON posts (date DES
 pool.query(createPostTable);
 pool.query(createPostIndex);
 const createUserTable =
-  "CREATE TABLE IF NOT EXISTS users (username varchar(256) NOT null, password varchar(256) NOT null);"
+  "CREATE TABLE IF NOT EXISTS users (username varchar(256) NOT null UNIQUE, password varchar(256) NOT null);"
 pool.query(createUserTable);
 
 //https://github.com/voxpelli/node-connect-pg-simple/blob/main/table.sql
@@ -73,8 +74,10 @@ app.use(session({
 }));
 passport.use(new Strategy(async (username: string, password: string, done) => {
   const user = await pool.query("SELECT * FROM users WHERE username = $1 LIMIT 1", [username]);
-  const compare = await bcrypt.compare(password, user.rows[0].password);
-  if(user && compare) done(null, user.rows[0].username);
+  if(user.rows.length > 0) {
+    const compare = await bcrypt.compare(password, user.rows[0].password);
+    if(compare) return done(null, user.rows[0].username);
+  }
   else return done(null, false);
 }));
 passport.serializeUser((username, done) => {
@@ -97,7 +100,13 @@ app.get("/", async (req: Request, res: Response) => {
   res.render("index", {posts: posts.rows, isoDate, base64,});
 });
 
+app.get(`/${process.env.POST}`, async (req: Request, res: Response) => {
+  if (!req.isAuthenticated()) return res.redirect("/");
+  res.render("post", {postPath, deletePath,});
+});
+
 app.post(`/${process.env.POST}`, [check("text").trim().escape(), limiter, upload.single("img")], async (req: Request, res: Response) => {
+  if (!req.isAuthenticated()) return res.redirect("/");
   if(req.file && path.extname(req.file.originalname).toLowerCase() !== ".png")
     return res.status(403).contentType("text/plain").end("File must be of type .png");
   const img = req.file ? await fs.readFile(req.file.path) : null;
@@ -109,27 +118,46 @@ app.post(`/${process.env.POST}`, [check("text").trim().escape(), limiter, upload
         res.status(500).send("Error inserting post into database");
       } else {
         console.log({IP: req.ip, text, date: new Date(),});
-        res.redirect("/");
+        res.redirect(deletePath);
+      }
+  });
+});
+
+app.get(`/${process.env.SIGNUP}`, (req: Request, res: Response) => {
+  if(req.isAuthenticated()) return res.redirect(`/${process.env.POST}`);
+  res.render("signup", {signup: `/${process.env.SIGNUP}`,});
+});
+app.post(`/${process.env.SIGNUP}`, async (req: Request, res: Response) => {
+  const saltRounds = 10;
+  const hp = await bcrypt.hash(process.env.ADMIN_PASSWORD || "1", saltRounds);
+  await pool.query("INSERT INTO users (username, password) VALUES ($1, $2);", [process.env.ADMIN, hp],
+    (err: Error) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send("Error signing up");
+      } else {
+        console.log({IP: req.ip, date: new Date(), message: "Signup",});
+        res.redirect(`/${process.env.LOGIN}`);
       }
   });
 });
 
 app.get(`/${process.env.LOGIN}`, (req: Request, res: Response) => {
-  if(req.isAuthenticated()) return res.redirect(deletePath);
+  if(req.isAuthenticated()) return res.redirect(postPath);
   res.render("login", {login: `/${process.env.LOGIN}`,});
 });
 app.post(`/${process.env.LOGIN}`, passport.authenticate("local", {
-    successRedirect: deletePath,
+    successRedirect: postPath,
     failureRedirect: "/",
     failureMessage: "Invalid",
   }),
- (req: Request, res: Response) => res.redirect(`${process.env.DELETE}`)
+ (req: Request, res: Response) => res.redirect(`/${process.env.POST}`)
 );
 
 app.get(deletePath, async (req: Request, res: Response) => {
   if (!req.isAuthenticated()) return res.redirect("/");
   const posts = await pool.query("SELECT * FROM posts ORDER BY date DESC;");
-  res.render("delete", {data: posts.rows, isoDate, deletePath,});
+  res.render("delete", {data: posts.rows, isoDate, base64, postPath, deletePath,});
 });
 
 app.post(deletePath, async (req: Request, res: Response) => {
@@ -143,7 +171,7 @@ app.post(deletePath, async (req: Request, res: Response) => {
         res.status(500).send("Error deleting posts from database");
       } else {
         console.log({IP: req.ip, date: new Date()});
-        res.redirect("/");
+        res.redirect(postPath);
       }
   });
 });

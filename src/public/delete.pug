@@ -8,7 +8,9 @@ html
       input(type="text" name="end" placeholder="end" required)
       button#submitButton(type="submit") Delete
     br
+    a(href=postPath) post
+    br
     for post in data
       p #{isoDate(post.date)}
       p #{post.text}
-      img(src=post.img)
+      img(src=base64(post.img))
