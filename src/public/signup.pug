@@ -1,7 +1,5 @@
-doctype html
-html
-  head
-    link(href="data:image/x-icon;base64,A" rel="icon" type="image/x-icon")
-  body
-    form(action=signup method="post")
-      button#submitButton(type="submit") signup
+extends layout
+
+block content
+  form(action=signup method="post")
+    button#submitButton(type="submit") signup
