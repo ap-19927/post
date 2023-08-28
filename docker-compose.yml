@@ -6,7 +6,7 @@ services:
     image: postgres
     restart: unless-stopped
     ports:
-      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+      - "${POSTGRES_PORT}:5432"
     env_file:
       - .env
     networks:
