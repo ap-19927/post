@@ -1,4 +1,3 @@
-cp env .env
 mkdir data
 mkdir data/nginx
 mkdir data/nginx/templates
