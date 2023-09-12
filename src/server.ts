@@ -33,7 +33,6 @@ const imgStorage = multer.diskStorage({
 });
 const upload = multer({
   storage: imgStorage,
-  // you might also want to set some limits: https://github.com/expressjs/multer#limits
 });
 const pool: Pool = new Pool({
   host: process.env.POSTGRES_HOST,
@@ -59,6 +58,7 @@ pool.query(createSessionIndex);
 
 const PGStore = pgSession(session);
 const ss = process.env.SESSION_SECRET == undefined ? "ss" : process.env.SESSION_SECRET;
+const cookieAge = 1000*60*60*24*30//30 days
 app.use(session({
   secret: ss,
   resave: false,
@@ -68,7 +68,7 @@ app.use(session({
     tableName: "session",
   }),
   cookie: {
-    maxAge: 1000*60, //1 minute
+    maxAge: cookieAge,
     secure: false,
   }
 }));
