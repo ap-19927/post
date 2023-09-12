@@ -38,7 +38,7 @@ const upload = multer({
 const pool: Pool = new Pool({
   host: process.env.POSTGRES_HOST,
   database: process.env.POSTGRES_DB,
-  port: process.env.POSTGRES_PORT_LOCAL,
+  port: Number(process.env.POSTGRES_PORT_LOCAL),
   user: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
 });
