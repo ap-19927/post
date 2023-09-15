@@ -6,13 +6,13 @@ services:
     image: postgres
     restart: unless-stopped
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "127.0.0.1:${POSTGRES_PORT}:${POSTGRES_PORT_LOCAL}"
     env_file:
       - .env
-    networks:
-      - external
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
+    networks:
+      - external
 
   source:
     container_name: source
@@ -23,7 +23,7 @@ services:
     depends_on:
       - db
     ports:
-      - "${PORT}:${PORT}"
+      - "127.0.0.1:${PORT}:${PORT}"
     env_file:
       - .env
     networks:
@@ -42,6 +42,8 @@ services:
       - ./data/nginx/templates:/etc/nginx/templates
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
+    networks:
+      - external
 
   certbot:
     container_name: cert
@@ -49,6 +51,8 @@ services:
     volumes:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
+    networks:
+      - external
 
 networks:
   external:
