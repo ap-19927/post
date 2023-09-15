@@ -20,7 +20,7 @@ server {
   listen 443 ssl;
   server_name \${URI};
   location / {
-    proxy_pass http://172.17.0.1:\${PORT};
+    proxy_pass http://\${PROXY_IP}:\${PORT};
   }
   client_max_body_size 4M;
   ssl_certificate /etc/letsencrypt/live/\${URI}-0001/fullchain.pem;

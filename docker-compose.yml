@@ -23,7 +23,7 @@ services:
     depends_on:
       - db
     ports:
-      - "127.0.0.1:${PORT}:${PORT}"
+      - "${PROXY_IP}:${PORT}:${PORT}"
     env_file:
       - .env
     networks:
