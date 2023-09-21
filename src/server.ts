@@ -13,11 +13,11 @@ import { isoDate, base64 } from "./utils";
 import bcrypt from "bcrypt";
 import multer from "multer";
 
-const deletePath = `/${process.env.DELETE}`;
-const postPath = `/${process.env.POST}`;
-
-const app: Express = express();
-app.set("trust proxy", true);
+const deletePath = `/${process.env.ADMIN_PATH}/${process.env.DELETE}`;
+const postPath = `/${process.env.ADMIN_PATH}/${process.env.POST}`;
+const signupPath = `/${process.env.ADMIN_PATH}/${process.env.SIGNUP}`;
+const loginPath = `/${process.env.ADMIN_PATH}/${process.env.LOGIN}`;
+const logoutPath = `/${process.env.ADMIN_PATH}/${process.env.LOGOUT}`;
 
 const limiter = rateLimit({
   windowMs: 1000*60, //1 minute
@@ -56,10 +56,28 @@ const createSessionIndex = "CREATE INDEX IF NOT EXISTS IDX_session_expire ON ses
 pool.query(createSessionTable);
 pool.query(createSessionIndex);
 
+
+const app: Express = express();
+app.set("trust proxy", true);
+app.use(express.static(path.join(__dirname, "../src/public")));
+app.set("views", path.join(__dirname, "../src/public"));
+app.set("view engine", "pug");
+
+app.get("/", async (req: Request, res: Response) => {
+  const posts = await pool.query("SELECT * FROM posts ORDER BY date DESC;");
+  res.render("index", {posts: posts.rows, isoDate, base64,});
+});
+
+const privateApp: Express = express();
+privateApp.set("trust proxy", true);
+privateApp.use(express.static(path.join(__dirname, "../src/public")));
+privateApp.set("views", path.join(__dirname, "../src/public"));
+privateApp.set("view engine", "pug");
+
 const PGStore = pgSession(session);
 const ss = process.env.SESSION_SECRET == undefined ? "ss" : process.env.SESSION_SECRET;
 const cookieAge = 1000*60*60*24*30//30 days
-app.use(session({
+privateApp.use(session({
   secret: ss,
   resave: false,
   saveUninitialized: false,
@@ -86,27 +104,23 @@ passport.serializeUser((username, done) => {
 passport.deserializeUser((username: string, done) => {
   done(null, username);
 });
-app.use(passport.initialize());
-app.use(passport.session());
+privateApp.use(passport.initialize());
+privateApp.use(passport.session());
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+privateApp.use(bodyParser.urlencoded({ extended: false }));
+privateApp.use(bodyParser.json());
 
-app.use(express.static(path.join(__dirname, "../src/public")));
-app.set("views", path.join(__dirname, "../src/public"));
-app.set("view engine", "pug");
-
-app.get("/", async (req: Request, res: Response) => {
-  const posts = await pool.query("SELECT * FROM posts ORDER BY date DESC;");
-  res.render("index", {posts: posts.rows, isoDate, base64,});
+privateApp.get("/", (req: Request, res: Response) => {
+  res.redirect(loginPath);
 });
+privateApp.set("trust proxy", true);
 
-app.get(`/${process.env.POST}`, async (req: Request, res: Response) => {
+privateApp.get(`/${process.env.POST}`, async (req: Request, res: Response) => {
   if (!req.isAuthenticated()) return res.redirect("/");
   res.render("post", {postPath, deletePath,});
 });
 
-app.post(`/${process.env.POST}`, [check("text").trim().escape(), limiter, upload.single("img")], async (req: Request, res: Response) => {
+privateApp.post(`/${process.env.POST}`, [check("text").trim().escape(), limiter, upload.single("img")], async (req: Request, res: Response) => {
   if (!req.isAuthenticated()) return res.redirect("/");
   if(req.file && path.extname(req.file.originalname).toLowerCase() !== ".png")
     return res.status(403).contentType("text/plain").end("File must be of type .png");
@@ -124,11 +138,11 @@ app.post(`/${process.env.POST}`, [check("text").trim().escape(), limiter, upload
   });
 });
 
-app.get(`/${process.env.SIGNUP}`, (req: Request, res: Response) => {
-  if(req.isAuthenticated()) return res.redirect(`/${process.env.POST}`);
-  res.render("signup", {signup: `/${process.env.SIGNUP}`,});
+privateApp.get(`/${process.env.SIGNUP}`, (req: Request, res: Response) => {
+  if(req.isAuthenticated()) return res.redirect(postPath);
+  res.render("signup", {signupPath,});
 });
-app.post(`/${process.env.SIGNUP}`, async (req: Request, res: Response) => {
+privateApp.post(`/${process.env.SIGNUP}`, async (req: Request, res: Response) => {
   const saltRounds = 10;
   const hp = await bcrypt.hash(process.env.ADMIN_PASSWORD || "1", saltRounds);
   await pool.query("INSERT INTO users (username, password) VALUES ($1, $2);", [process.env.ADMIN, hp],
@@ -138,16 +152,16 @@ app.post(`/${process.env.SIGNUP}`, async (req: Request, res: Response) => {
         res.status(500).send("Error signing up");
       } else {
         console.log({IP: req.ip, date: new Date(), message: "Signup",});
-        res.redirect(`/${process.env.LOGIN}`);
+        res.redirect(loginPath);
       }
   });
 });
 
-app.get(`/${process.env.LOGIN}`, (req: Request, res: Response) => {
+privateApp.get(`/${process.env.LOGIN}`, (req: Request, res: Response) => {
   if(req.isAuthenticated()) return res.redirect(postPath);
-  res.render("login", {login: `/${process.env.LOGIN}`,});
+  res.render("login", {loginPath,});
 });
-app.post(`/${process.env.LOGIN}`, passport.authenticate("local", {
+privateApp.post(`/${process.env.LOGIN}`, passport.authenticate("local", {
     successRedirect: postPath,
     failureRedirect: "/",
     failureMessage: "Invalid",
@@ -155,13 +169,20 @@ app.post(`/${process.env.LOGIN}`, passport.authenticate("local", {
  (req: Request, res: Response) => res.redirect(`/${process.env.POST}`)
 );
 
-app.get(deletePath, async (req: Request, res: Response) => {
-  if (!req.isAuthenticated()) return res.redirect("/");
-  const posts = await pool.query("SELECT * FROM posts ORDER BY date DESC;");
-  res.render("delete", {data: posts.rows, isoDate, base64, postPath, deletePath,});
+privateApp.post(`/${process.env.LOGOUT}`, (req: Request, res: Response) => {
+  req.logout((err) => {
+    console.log("logout");
+    res.redirect("/");
+  });
 });
 
-app.post(deletePath, async (req: Request, res: Response) => {
+privateApp.get(`/${process.env.DELETE}`, async (req: Request, res: Response) => {
+  if (!req.isAuthenticated()) return res.redirect("/");
+  const posts = await pool.query("SELECT * FROM posts ORDER BY date DESC;");
+  res.render("delete", {data: posts.rows, isoDate, base64, postPath, deletePath, logoutPath,});
+});
+
+privateApp.post(`/${process.env.DELETE}`, async (req: Request, res: Response) => {
   if (!req.isAuthenticated()) return res.redirect("/");
   const startDate = req.body.start;
   const endDate = req.body.end;
@@ -177,4 +198,5 @@ app.post(deletePath, async (req: Request, res: Response) => {
   });
 });
 
-app.listen(process.env.PORT);
+app.use(`/${process.env.ADMIN_PATH}`, privateApp);
+app.listen(process.env.PORT, () => { console.log(`Listening on ${process.env.PORT}`) });

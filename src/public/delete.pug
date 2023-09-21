@@ -8,6 +8,9 @@ block content
   br
   a(href=postPath) post
   br
+  form(action=logoutPath method="post")
+    button#submitButton(type="submit") LOGOUT
+  br
   for post in data
     p #{isoDate(post.date)}
     p #{post.text}

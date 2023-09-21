@@ -1,7 +1,7 @@
 extends layout
 
 block content
-  form(action=login method="post")
+  form(action=loginPath method="post")
     input(type="text" name="username" placeholder="username" required)
     input(type="text" name="password" placeholder="password" id="password" required)
     button#submitButton(type="submit") Login

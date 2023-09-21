@@ -4,7 +4,6 @@
   "description": "",
   "source": "public/index.pug",
   "scripts": {
-    "dev": "docker compose -f docker-compose-dev.yml --build up",
     "build": "tsc"
   },
   "author": "",
