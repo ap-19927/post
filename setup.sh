@@ -17,7 +17,7 @@ bash letsencrypt-init.sh
 
 cat >> data/nginx/templates/app.conf.template << EOF
 server {
-  listen 443 ssl;
+  listen [::]:443 ssl http2;
   server_name \${URI};
   location / {
     proxy_pass http://\${PROXY_IP}:\${PORT};

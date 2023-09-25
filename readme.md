@@ -35,3 +35,9 @@ https://pentacent.medium.com/nginx-and-lets-encrypt-with-docker-in-less-than-5-m
 https://stackoverflow.com/questions/55115080/how-to-specify-different-port-for-a-docker-postgres-instance
 
 https://stackoverflow.com/questions/68449947/certbot-failing-acme-challenge-connection-refused
+
+https://stackoverflow.com/questions/17233068/two-apps-in-expressjs
+
+https://www.passportjs.org/concepts/authentication/logout/
+
+https://www.cyberciti.biz/faq/nginx-ipv6-configuration/
