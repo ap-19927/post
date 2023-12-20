@@ -17,5 +17,3 @@ PRIVATE_IP=127.0.0.1
 POST=post
 SESSION_SECRET=secret
 PROXY_IP=127.0.0.1
-URI=post.roadpeoples.org
-IP=127.0.0.1
