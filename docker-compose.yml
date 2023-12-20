@@ -2,7 +2,7 @@ version: "3.4"
 
 services:
   db:
-    container_name: db
+    container_name: post_db
     image: postgres
     restart: unless-stopped
     ports:
@@ -15,7 +15,7 @@ services:
       - external
 
   source:
-    container_name: source
+    container_name: post_source
     build:
       dockerfile: Dockerfile
       context: .
@@ -26,31 +26,6 @@ services:
       - "${PROXY_IP}:${PORT}:${PORT}"
     env_file:
       - .env
-    networks:
-      - external
-
-  reverse-proxy:
-    container_name: reverse-proxy
-    image: nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    env_file:
-      - .env
-    volumes:
-      - ./data/nginx/templates:/etc/nginx/templates
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
-    networks:
-      - external
-
-  certbot:
-    container_name: cert
-    image: certbot/certbot
-    volumes:
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
     networks:
       - external
 
