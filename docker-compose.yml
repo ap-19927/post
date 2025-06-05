@@ -5,7 +5,7 @@ services:
     container_name: post_db
     image: postgres
     restart: unless-stopped
-    ports:
+    expose:
       - "127.0.0.1:${POSTGRES_PORT}:${POSTGRES_PORT_LOCAL}"
     env_file:
       - .env
